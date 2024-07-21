@@ -24,22 +24,47 @@ class PlayerNamesBlock(Block):
     def __iter__(self):
         return iter(self.data)
 
+@parser.register("MAP")
+class MapBlock(Block):
+    """ Info about the map
+
+    Data contains list of water tiles. Also contains width and height of the map.
+    """
+    def __init__(self):
+        super().__init__()
+        self.width : int = 0
+        self.height : int = 0
+        self.data : List[Tuple[int,int]] = []
+
+    @classmethod
+    def parse(cls, lines : int, stream : TextIO):
+        this = super().parse(lines, stream)
+        assert len(this._data) >= 1, "MAP block must contain at least 1 line"
+        this.width, this.height = map(int, this._data[0].split())
+        for line in this._data[1:]:
+            x, y = map(int, line.split())
+            this.data.append((x,y))
+        return this
+
+    def __iter__(self):
+        return iter(self.data)
+
 @parser.register("SPAWN_POSITIONS")
 class SpawnPositionsBlock(Block):
     """ Starting positions of ant hills
 
-    Data contains tuples of (team, x, y)
+    Data contains tuples of (id, team, x, y)
     """
     def __init__(self):
         super().__init__()
-        self.data : List[Tuple[int,int,int]] = []
+        self.data : List[Tuple[int,int,int,int]] = []
 
     @classmethod
     def parse(cls, lines : int, stream : TextIO):
         this = super().parse(lines, stream)
         for line in this._data:
-            team, x, y = map(int, line.split())
-            this.data.append((team, x, y))
+            id, team, x, y = map(int, line.split())
+            this.data.append((id, team, x, y))
         return this
 
     def __iter__(self):
@@ -70,18 +95,18 @@ class MoveBlock(Block):
 class AntSpawnBlock(Block):
     """ Ant spawns
 
-    Data contains tuples of (team, x, y)
+    Data contains tuples of (team, id, x, y)
     """
     def __init__(self):
         super().__init__()
-        self.data : List[Tuple[int,int]] = []
+        self.data : List[Tuple[int,int,int,int]] = []
 
     @classmethod
     def parse(cls, lines : int, stream : TextIO):
         this = super().parse(lines, stream)
         for line in this._data:
-            x, y = line.split()
-            this.data.append((int(x), int(y)))
+            id, team, x, y = map(int, line.split())
+            this.data.append((id, team, x, y))
         return this
 
     def __iter__(self):
@@ -108,11 +133,31 @@ class FoodBlock(Block):
     def __iter__(self):
         return iter(self.data)
 
-@parser.register("KILLS")
-class KillBlock(Block):
-    """ Ant and hill kills
+@parser.register("ANT_KILLS")
+class AntKillBlock(Block):
+    """ Ant kills
 
     Data contains list of killed IDs
+    """
+    def __init__(self):
+        super().__init__()
+        self.data: List[int] = []
+
+    @classmethod
+    def parse(cls, lines : int, stream : TextIO):
+        this = super().parse(lines, stream)
+        for line in this._data:
+            this.data.append(int(line))
+        return this
+
+    def __iter__(self):
+        return iter(self.data)
+
+@parser.register("RAZED_HILLS")
+class RazedHillsBlock(Block):
+    """ Hill razes
+
+    Data contains list of razed hills IDs
     """
     def __init__(self):
         super().__init__()

@@ -2,7 +2,6 @@ import sys
 
 from typing import List
 
-from canvas import GameCanvas
 from communication.parser import parser
 from communication.groups import GameHeader, Turn
 
