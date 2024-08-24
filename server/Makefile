@@ -13,7 +13,7 @@ reverse =  $(subst /,/src/,$(patsubst $(OBJDIR)/%.o,%.cpp,$1))
 
 #linker
 LINKER = g++
-LFLAGS = 
+LFLAGS =
 INCLUDE = $(addprefix -I, $(wildcard **/include))
 
 
@@ -48,3 +48,5 @@ $(COBJECTS): $$(call reverse,$$@)
 clean:
 	@rm -rf $(PROGRAM) $(OBJDIR)
 	@echo -e $(Cyan)"Cleaning Complete!"$(Color_Off)
+
+.PHONY: all clean

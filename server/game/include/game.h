@@ -7,6 +7,8 @@
 
 #include "types.h"
 #include "ant.h"
+#include "hill.h"
+#include "food.h"
 
 class Game {
 public:
@@ -21,6 +23,8 @@ public:
 protected:
 	int player_count;
 	std::set<Ant, AntComparator> alive_ants;
+	std::set<Hill, HillComparator> alive_hills;
+	std::set<Food, FoodComparator> alive_food;
 
 	void game_loop();
 	void init();
@@ -28,4 +32,6 @@ protected:
 	void cleanup();
 
 	void kill_ant(AntID);
+	void kill_hill(HillID);
+	void harvest_food(FoodID, PlayerID);
 };

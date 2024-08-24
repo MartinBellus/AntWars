@@ -6,8 +6,8 @@
 
 struct Point{
 	int x, y;
-    Point(int ,int);
-    Point(){};
+    Point(int x,int y) : x(x), y(y){}
+    Point(){}
     long long dist2() const;
     friend Point operator+(const Point &, const Point&);
     friend Point operator-(const Point &, const Point&);
