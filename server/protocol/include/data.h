@@ -1,7 +1,9 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <map>
+#include <sstream>
 
 #include "types.h"
 #include "point.h"
@@ -13,4 +15,9 @@ struct ObserverTurn {
 
 struct PlayerTurn {
 
+};
+
+struct Moves {
+	std::vector<std::pair<AntID, Point>> data;
+	static Moves from_sstream(std::stringstream&);
 };
