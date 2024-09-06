@@ -32,6 +32,7 @@ public:
 	void kill_player(PlayerID);
 private:
 	struct ProbojPlayer {
+		ProbojPlayer() {};
 		PlayerID id;
 		std::string name;
 		std::string dir_path;

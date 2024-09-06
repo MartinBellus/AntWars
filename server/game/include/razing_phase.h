@@ -6,4 +6,4 @@
 #include "hill.h"
 #include "types.h"
 
-std::vector<HillID> mark_razed_hills(const std::set<Ant,AntComparator>&, const std::set<Hill,HillComparator>&);
+std::vector<HillID> mark_razed_hills(const AntMap&, const std::set<Hill,HillComparator>&);

@@ -10,30 +10,30 @@ bool are_battling(const Ant& a, const Ant& b){
 	return (a.get_position() - b.get_position()).dist2() <= constants::ANT_BATTLE_RADIUS2 && a.get_owner() != b.get_owner();
 }
 
-vector<AntID> mark_killed_ants(const set<Ant, AntComparator>& ants){
+vector<AntID> mark_killed_ants(const AntMap& ants){
 	map<AntID, int> focus_split;
 	vector<AntID> killed_ants;
 
 	map<Point, AntID> ant_at;
 
-	for(const Ant &a : ants) {
+	for(auto &[_, a] : ants) {
 		ant_at[a.get_position()] = a.get_id();
 	}
 
-	for(const Ant &a : ants) {
+	for(auto &[_, a] : ants) {
 		for(Point p : points_in_circle(a.get_position(), constants::ANT_BATTLE_RADIUS2)){
 			if(ant_at.find(p) == ant_at.end()) continue;
-			Ant b = *ants.find(ant_at[p]);
+			Ant b = ants.find(ant_at[p])->second;
 			if(are_battling(a, b)){
 				focus_split[a.get_id()]++;
 			}
 		}
 	}
 
-	for(const Ant &a : ants) {
+	for(auto &[_, a] : ants) {
 		for(Point p : points_in_circle(a.get_position(), constants::ANT_BATTLE_RADIUS2)){
 			if(ant_at.find(p) == ant_at.end()) continue;
-			Ant b = *ants.find(ant_at[p]);
+			Ant b = ants.find(ant_at[p])->second;
 			AntID a_id = a.get_id(), b_id = b.get_id();
 			if(a_id == b_id) continue;
 			if(are_battling(a, b)){

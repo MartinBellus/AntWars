@@ -2,7 +2,6 @@
 #include "attack_phase.h"
 #include "gather_phase.h"
 #include "razing_phase.h"
-#include "data.h"
 
 using namespace std;
 
@@ -23,10 +22,10 @@ void Game::init() {
 }
 
 void Game::game_loop() {
-	// logger.log("STARTING TURN: " + to_string(current_turn));
+	logger.log("STARTING TURN: " + to_string(current_turn));
 	// handle player moves
 	//
-	for(Player player : alive_players) {
+	for(auto &[_, player] : alive_players) {
 		// TODO: prepare payload and send turn to player
 		PlayerID player_id = player.get_id();
 		Status status;
@@ -40,15 +39,12 @@ void Game::game_loop() {
 			kill_player(player_id);
 		}
 
-		Moves player_moves = Moves::from_sstream(ss);
-		for(auto [ant, new_position] : player_moves.data) {
-			if(alive_ants.find(ant) == alive_ants.end()) {
-				// TODO: Log ant does not exist
-
-				continue;
-			}
-			// TODO: move ant
+		auto player_moves = Moves::from_sstream(ss);
+		if(!player_moves.has_value()) {
+			logger.log("Could not parse data from player " + player.get_name());
+			continue;
 		}
+		handle_player_moves(player, player_moves.value());
 	}
 	//  check for collisions
 	//
@@ -91,15 +87,14 @@ bool Game::check_end() {
 }
 
 void Game::kill_player(PlayerID player_id) {
-	Player player = *alive_players.find(player_id);
-	alive_players.erase(player);
+	Player player = alive_players.find(player_id)->second;
+	alive_players.erase(player_id);
 	player_manager.kill_player(player_id);
-	// logger.log("Player " + player.get_name() + " has been killed");
+	logger.log("Player " + player.get_name() + " has been killed");
 }
 
 void Game::kill_ant(AntID ant_id) {
-	Ant ant = *alive_ants.find(ant_id);
-	alive_ants.erase(ant);
+	alive_ants.erase(ant_id);
 }
 
 void Game::kill_hill(HillID hill_id) {
@@ -111,7 +106,7 @@ void Game::harvest_food(FoodID food_id, PlayerID player_id) {
 	Food food = *alive_food.find(food_id);
 	alive_food.erase(food);
 	if(player_id != PlayerID::NONE) {
-		Player player = *alive_players.find(player_id);
-		player.inc_food_count();
+		Player &p = alive_players[player_id];
+		p.inc_food_count();
 	}
 }

@@ -2,8 +2,7 @@
 
 using namespace std;
 
-// TODO: Return expected<Moves>
-Moves Moves::from_sstream(stringstream &in) {
+optional<Moves> Moves::from_sstream(stringstream &in) {
 	Moves moves;
 	string line;
 	while(getline(in, line)) {
@@ -12,8 +11,9 @@ Moves Moves::from_sstream(stringstream &in) {
 		if(cin >> id >> x >> y) {
 			moves.data.push_back({AntID(id), Point(x, y)});
 		}else {
-			// TODO: Log parsing error
+			// Return None value
+			return nullopt;
 		}
 	}
-	return moves;
+	return option(moves);
 }

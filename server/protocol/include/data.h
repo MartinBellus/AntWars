@@ -19,5 +19,5 @@ struct PlayerTurn {
 
 struct Moves {
 	std::vector<std::pair<AntID, Point>> data;
-	static Moves from_sstream(std::stringstream&);
+	static std::optional<Moves> from_sstream(std::stringstream&);
 };

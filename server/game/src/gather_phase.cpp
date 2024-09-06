@@ -5,9 +5,9 @@
 
 using namespace std;
 
-vector<pair<FoodID, PlayerID>> get_harvested_food(const std::set<Ant, AntComparator> &ants, const std::set<Food,FoodComparator> &foods){
+vector<pair<FoodID, PlayerID>> get_harvested_food(const AntMap &ants, const std::set<Food,FoodComparator> &foods){
 	map<Point, PlayerID> ant_at;
-	for (const Ant &ant : ants){
+	for (auto &[_, ant] : ants){
 		ant_at[ant.get_position()] = ant.get_owner();
 	}
 
