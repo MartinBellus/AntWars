@@ -31,11 +31,11 @@ void Game::game_loop() {
 		Status status;
 		stringstream ss = player_manager.read_player(player_id, status);
 
-		if(status == Status::Tle) {
-			player_manager.log_player(player_id, "Killing player: Time limit exceeded");
+		if(status == Status::TLE) {
+			logger.log("Killing player " + player.get_name() + ": Time limit exceeded");
 			kill_player(player_id);
-		}else if(status == Status::Err) {
-			player_manager.log_player(player_id, "Killing player: Bot has crashed");
+		}else if(status == Status::ERR) {
+			logger.log("Killing player " + player.get_name() + ": Bot has crashed");
 			kill_player(player_id);
 		}
 
@@ -87,10 +87,10 @@ bool Game::check_end() {
 }
 
 void Game::kill_player(PlayerID player_id) {
-	Player player = alive_players.find(player_id)->second;
-	alive_players.erase(player_id);
+	Player& player = alive_players[player_id];
 	player_manager.kill_player(player_id);
 	logger.log("Player " + player.get_name() + " has been killed");
+	alive_players.erase(player_id);
 }
 
 void Game::kill_ant(AntID ant_id) {
