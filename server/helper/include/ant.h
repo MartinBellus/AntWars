@@ -14,7 +14,7 @@ namespace constants{
 class Ant { // TODO add interface
 public:
 	Ant(Point position, PlayerID owner) : position(position), owner(owner), id(++id_counter) {}
-	Ant();
+	Ant() {}
 	Point get_position() const {return position;}
 	void set_position(Point p) {position = p;}
 	PlayerID get_owner() const {return owner;}

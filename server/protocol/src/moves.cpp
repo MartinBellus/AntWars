@@ -15,5 +15,5 @@ optional<Moves> Moves::from_sstream(stringstream &in) {
 			return nullopt;
 		}
 	}
-	return option(moves);
+	return optional(moves);
 }
