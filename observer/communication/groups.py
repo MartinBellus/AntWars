@@ -42,11 +42,9 @@ class GameHeader:
 class Turn:
     num : int = 0
     def __init__(self):
-        self.moves : MoveBlock = MoveBlock()
-        self.ant_spawns : AntSpawnBlock = AntSpawnBlock()
+        self.alive_ants : AliveAntsBlock = AliveAntsBlock()
         self.food : FoodBlock = FoodBlock()
-        self.ant_kills : AntKillBlock = AntKillBlock()
-        self.hill_razes : RazedHillsBlock = RazedHillsBlock()
+        self.alive_hills : AliveHillsBlock = AliveHillsBlock()
         self.num = Turn.num
         Turn.num += 1
 
@@ -55,16 +53,12 @@ class Turn:
         this = cls()
         while block := parser.next_block(stream):
             match block:
-                case MoveBlock():
-                    this.moves = block
-                case AntSpawnBlock():
-                    this.ant_spawns = block
+                case AliveAntsBlock():
+                    this.alive_ants = block
                 case FoodBlock():
                     this.food = block
-                case AntKillBlock():
-                    this.ant_kills = block
-                case RazedHillsBlock():
-                    this.hill_razes = block
+                case AliveHillsBlock():
+                    this.alive_hills = block
                 case _:
                     print(f"Unexpected block {block.__class__.__name__}", file=sys.stderr)
 
@@ -73,9 +67,7 @@ class Turn:
     def __str__(self) -> str:
         return f"""
         Turn {self.num}:
-            {self.moves}
-            {self.ant_spawns}
+            {self.alive_ants}
+            {self.alive_hills}
             {self.food}
-            {self.ant_kills}
-            {self.hill_razes}
         """

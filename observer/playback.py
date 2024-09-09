@@ -49,6 +49,7 @@ class Playback:
         self.recording : Recording = Recording.open(file_name)
         self.state : State = State.PAUSED
         self.turn : int = 0
+        self.previous_turn : int = -1;
         self.delay : int = 500
 
         self.controller = self.PlaybackController(master, self)
@@ -72,31 +73,44 @@ class Playback:
 
         self.game.after(self.delay, self.loop)
 
+    def display(self):
+        self.handle_food(self.turn)
+
+        alive_ants = set(self.recording.turns[self.turn].alive_ants.data.keys())
+        if self.previous_turn == -1:
+            alive_ants_previous = set()
+        else:
+            alive_ants_previous = set(self.recording.turns[self.previous_turn].alive_ants.data.keys())
+        for ant_id in alive_ants - alive_ants_previous:
+            team_id, x, y = self.recording.turns[self.turn].alive_ants.data[ant_id]
+            self.game.spawn_ant(ant_id, x, y, team_id)
+
+        for ant_id in alive_ants_previous - alive_ants:
+            self.game.kill_ant(ant_id)
+
+        for ant_id in alive_ants & alive_ants_previous:
+            team_id, x, y = self.recording.turns[self.turn].alive_ants.data[ant_id]
+            self.game.move_ant(ant_id, x, y)
+
+        alive_hills = set(self.recording.turns[self.turn].alive_hills)
+        alive_hills_previous = set(self.recording.turns[self.previous_turn].alive_hills)
+
+        for hill_id in alive_hills - alive_hills_previous:
+            self.game.revive_hill(hill_id)
+
+        for hill_id in alive_hills_previous - alive_hills:
+            self.game.raze_hill(hill_id)
+
+        self.previous_turn = self.turn
+        self.controller.update_turn_count()
+
+
     def next_turn(self):
         if self.turn == len(self.recording.turns) - 1:
             return
 
         self.turn += 1
-
-        self.handle_food(self.turn)
-
-        # Kill dead ants
-        for ant in self.recording.turns[self.turn].ant_kills:
-            self.game.kill_ant(ant)
-
-        # Move ants
-        for id, x, y in self.recording.turns[self.turn].moves:
-            self.game.move_ant(id, x, y)
-
-        # Spawn new ants
-        for id, team, x, y in self.recording.turns[self.turn].ant_spawns:
-            self.game.spawn_ant(id, x, y, team)
-
-        # Raze hills
-        for id in self.recording.turns[self.turn].hill_razes:
-            self.game.raze_hill(id)
-
-        self.controller.update_turn_count()
+        self.display()
 
 
     def prev_turn(self):
@@ -104,30 +118,7 @@ class Playback:
             return
 
         self.turn -= 1
-
-        self.handle_food(self.turn)
-
-        # Revive dead ants
-        for ant in self.recording.turns[self.turn+1].ant_kills:
-            self.game.revive_ant(ant)
-
-        # Move ants
-        for id, x, y in self.recording.turns[self.turn].moves:
-            self.game.move_ant(id, x, y)
-
-        # Move ants spawned this turn
-        for id, team, x, y in self.recording.turns[self.turn].ant_spawns:
-            self.game.move_ant(id, x, y)
-
-        # Kill spawned ants
-        for id, team, x, y in self.recording.turns[self.turn+1].ant_spawns:
-            self.game.kill_ant(id)
-
-        # Revive razed hills
-        for id in self.recording.turns[self.turn+1].hill_razes:
-            self.game.revive_hill(id)
-
-        self.controller.update_turn_count()
+        self.display()
 
     def handle_food(self, turn : int):
         self.game.clear_food()
