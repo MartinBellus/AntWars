@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <compare>
 #include <vector>
 
 struct Point{

@@ -26,4 +26,5 @@ private:
 
 typedef std::map<PlayerID, Player> PlayerMap ;
 
-void insert(PlayerMap&, Player&);
+/// @brief Insert player into the map and consume it
+void insert(PlayerMap&, Player&&);

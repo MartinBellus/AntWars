@@ -29,4 +29,5 @@ private:
 
 typedef std::map<AntID, Ant> AntMap ;
 
-void insert(AntMap&, Ant);
+/// @brief Insert ant into the map and consume it
+void insert(AntMap&, Ant&&);
