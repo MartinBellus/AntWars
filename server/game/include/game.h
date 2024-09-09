@@ -13,6 +13,7 @@
 #include "data.h"
 #include "player_manager.h"
 #include "logger.h"
+#include "observer.h"
 
 class Game {
 public:
@@ -34,6 +35,7 @@ protected:
 
 	PlayerManager player_manager;
 	Logger logger;
+	Observer observer;
 
 	void game_loop();
 	void init();
@@ -46,5 +48,5 @@ protected:
 	void harvest_food(FoodID, PlayerID);
 	void move_ant(AntID, Point);
 
-	void handle_player_moves(const Player&, const Moves&); 
+	void handle_player_moves(const Player&, const Moves&);
 };

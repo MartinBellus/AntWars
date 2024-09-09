@@ -4,7 +4,7 @@
 #include "types.h"
 #include "point.h"
 
-class Hill { // TODO add interface
+class Hill {
 public:
 	Hill(Point position, PlayerID owner) : position(position), owner(owner), id(++id_counter) {};
 	Point get_position() const {return position;}

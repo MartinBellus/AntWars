@@ -14,7 +14,6 @@ PlayerManager::PlayerManager(string home_dir, vector<PlayerConfig>& player_confi
 			cerr << "Player with id " << int(config.id) << " already exists!" << endl;
 			continue;
 		}
-		player_map[config.id] = player;
 
 		// Create players log file
 		string log_file_path = "";
@@ -25,6 +24,7 @@ PlayerManager::PlayerManager(string home_dir, vector<PlayerConfig>& player_confi
 		// Start player process
 		player.process.run(log_file_path);
 		player.process.send_signal(SIGSTOP);
+		player_map[config.id] = std::move(player);
 	}
 }
 

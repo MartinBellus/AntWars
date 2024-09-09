@@ -11,7 +11,7 @@ namespace constants{
 	inline int ANT_MOVE_RADIUS2 = 1;
 }
 
-class Ant { // TODO add interface
+class Ant {
 public:
 	Ant(Point position, PlayerID owner) : position(position), owner(owner), id(++id_counter) {}
 	Ant() {}
