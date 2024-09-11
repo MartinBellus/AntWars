@@ -65,6 +65,18 @@ string format_alive_food(const std::set<Food, FoodComparator>& food) {
     return ret.str();
 }
 
+string format_map(const Map& map) {
+    stringstream ret;
+
+    ret << "MAP " << map.get_water_tiles().size()+1 << "\n"
+    << map.get_width() << " " << map.get_height() << "\n";
+    for(const Point& p : map.get_water_tiles()) {
+        ret << format_point(p) << "\n";
+    }
+
+    return ret.str();
+}
+
 namespace client {
     string format_food_count(int food_count) {
         return "FOOD_COUNT 1\n" + to_string(food_count) + "\n";
@@ -98,7 +110,7 @@ namespace format {
         ret << "INIT\n"
         << observer::format_player_names(init.players)
         << observer::format_spawn_points(init.spawn_positions)
-        // TODO add map
+        << format_map(init.map)
         << DOT << "\n";
 
         return ret.str();
@@ -119,7 +131,7 @@ namespace format {
         stringstream ret;
         ret << "INIT\n"
         << client::format_spawn_info(init.my_id, init.spawn_positions)
-        // TODO add map
+        << format_map(init.map)
         << DOT << "\n";
         return ret.str();
     }

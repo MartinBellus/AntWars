@@ -12,6 +12,7 @@
 #include "hill.h"
 #include "ant.h"
 #include "player.h"
+#include "map.h"
 
 struct ObserverTurn {
     const AntMap& alive_ants;
@@ -22,7 +23,7 @@ struct ObserverTurn {
 
 struct ObserverInit {
     const PlayerMap& players;
-    // map
+    const Map& map;
     const std::set<Hill, HillComparator>& spawn_positions;
 };
 
@@ -35,7 +36,7 @@ struct PlayerTurn {
 };
 
 struct PlayerInit {
-    // map
+    const Map map;
     const std::set<Hill, HillComparator>& spawn_positions;
     PlayerID my_id;
 };

@@ -1,5 +1,7 @@
 #include "game.h"
+#include "ant_spawn_phase.h"
 #include "attack_phase.h"
+#include "check_collisions.h"
 #include "format.h"
 #include "gather_phase.h"
 #include "razing_phase.h"
@@ -17,13 +19,13 @@ void Game::run() {
 void Game::init() {
     // sent data to observer
     //
-    ObserverInit observer_init{alive_players, alive_hills};
+    ObserverInit observer_init{alive_players, world_map, alive_hills};
     observer.send(format::init_observer(observer_init));
 
     // run player processes
     //
     // send data to players
-    PlayerInit player_init{alive_hills, PlayerID::NONE};
+    PlayerInit player_init{world_map, alive_hills, PlayerID::NONE};
     for(const auto& [id, player] : alive_players) {
         player_init.my_id = id;
         player_manager.send_player(id, format::init_player(player_init));
@@ -66,7 +68,9 @@ void Game::game_loop() {
     }
     //  check for collisions
     //
-    // TODO
+    for(AntID ant_id : get_colliding_ants(alive_ants)) {
+        kill_ant(ant_id);
+    }
     // attack phase
     //
     for(AntID killed_ant : mark_killed_ants(alive_ants)){
@@ -80,7 +84,14 @@ void Game::game_loop() {
     }
     // spawn ants
     //
-    // TODO
+    for(auto &[player_id, player] : alive_players) {
+        for(Point p : get_new_ant_pos(player_hills[player_id], alive_hills, alive_ants)) {
+            if(player.get_food_count()) {
+                insert(alive_ants, Ant(p, player_id));
+                player.dec_food_count();
+            }
+        }
+    }
     // gather phase
     //
     for(auto [food, owner] : get_harvested_food(alive_ants, alive_food)){
@@ -125,6 +136,7 @@ void Game::kill_ant(AntID ant_id) {
 
 void Game::kill_hill(HillID hill_id) {
     Hill hill = *alive_hills.find(hill_id);
+    player_hills[hill.get_owner()].erase(hill_id);
     alive_hills.erase(hill);
 }
 

@@ -13,6 +13,8 @@ public:
     bool can_move_to(const Point&) const;
     const std::set<Point>& get_water_tiles() const { return water_tiles; };
     const std::set<Point>& get_hill_positions() const { return hill_positions; }
+    int get_width() const { return width; }
+    int get_height() const { return height; }
 private:
     int width, height;
     std::set<Point> water_tiles;

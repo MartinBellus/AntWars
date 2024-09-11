@@ -3,7 +3,7 @@
 #include <string>
 #include <set>
 #include <vector>
-#include <expected>
+#include <optional>
 
 #include "point.h"
 #include "types.h"
@@ -14,13 +14,14 @@
 #include "player_manager.h"
 #include "logger.h"
 #include "observer.h"
+#include "map.h"
 
 class Game {
 public:
 	/// @brief Create game from configuration file
 	/// @param path Path to configuration file
-	/// @return Game initialized game object
-	static std::expected<Game, std::string> load_config(const std::string& path);
+	/// @return Game initialized game object or nullopt
+	static std::optional<Game> load_config(const std::string& path);
 
 	/// @brief Start game
 	void run();
@@ -32,6 +33,8 @@ protected:
 	PlayerMap alive_players;
 	std::set<Hill, HillComparator> alive_hills;
 	std::set<Food, FoodComparator> alive_food;
+	std::map<PlayerID, std::set<HillID>> player_hills;
+	Map world_map;
 
 	PlayerManager player_manager;
 	Logger logger;
