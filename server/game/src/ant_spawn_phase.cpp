@@ -1,4 +1,5 @@
 #include "ant_spawn_phase.h"
+#include "rng.h"
 #include <algorithm>
 
 using namespace std;
@@ -15,6 +16,6 @@ vector<Point> get_new_ant_pos(const set<HillID>& my_hills, const set<Hill, HillC
             possible_positions.push_back(hill->get_position());
         }
     }
-    shuffle(possible_positions.begin(), possible_positions.end(), rand);
+    shuffle(possible_positions.begin(), possible_positions.end(), rng);
     return possible_positions;
 }

@@ -1,5 +1,5 @@
 #program name
-PROGRAM=server
+PROGRAM=../srv
 #build file
 OBJDIR = build
 
