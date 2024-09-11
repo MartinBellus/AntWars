@@ -6,7 +6,8 @@
 #include <string>
 
 struct Limits {
-	int time, memory;
+	int time = 1000;
+	int memory = 256*1024*1024;
 };
 
 enum class ProcessState {
@@ -22,7 +23,7 @@ struct Process {
 	std::string command;
 	bool running = false;
 	Limits limits;
-	Process(std::string command, Limits limit={500,500}) : command(command), limits(limit) {};
+	Process(std::string command, Limits limit) : command(command), limits(limit) {};
 	Process() {};
 
 	void run(const std::string& = "");

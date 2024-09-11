@@ -7,6 +7,7 @@
 #include "player.h"
 #include "types.h"
 #include "process.h"
+#include "config.h"
 
 enum class Status {
 	OK,
@@ -15,19 +16,15 @@ enum class Status {
 	END,
 };
 
-struct PlayerConfig {
-	PlayerConfig(std::string name, std::string dir_path, Limits limits) : id(++id_counter), name(name), dir_path(dir_path), limits(limits) {}
-	std::string name;
-	std::string dir_path;
-	PlayerID id;
+struct ProbojPlayerConfig {
+    const PlayerConfig& config;
 	Limits limits;
-	bool use_logs;
-	static inline PlayerID id_counter = PlayerID(0);
+	bool use_logs = true;
 };
 
 class PlayerManager {
 public:
-	PlayerManager(std::string, std::vector<PlayerConfig>&);
+	PlayerManager(const std::string&,const std::vector<ProbojPlayerConfig>&);
 	std::stringstream read_player(PlayerID, Status&);
 	void send_player(PlayerID,const std::string&);
 	std::stringstream send_and_read_player(PlayerID, const std::string&, Status&);
@@ -35,7 +32,7 @@ public:
 private:
 	struct ProbojPlayer {
 		ProbojPlayer() {}
-		ProbojPlayer(const PlayerConfig& conf, const std::string& command) : id(conf.id), name(conf.name), dir_path(conf.dir_path), process(command, conf.limits) {}
+		ProbojPlayer(const ProbojPlayerConfig& conf, const std::string& command) : id(conf.config.id), name(conf.config.name), dir_path(conf.config.dir_path), process(command, conf.limits) {}
 		PlayerID id;
 		std::string name;
 		std::string dir_path;

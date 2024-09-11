@@ -24,23 +24,24 @@ namespace constants {
 class Game {
 public:
 	/// @brief Create game from configuration file
-	/// @param path Path to configuration file
+	/// @param game_config Path to game configuration file
+	/// @param player_config Path to player configuration file
 	/// @return Game initialized game object or nullopt
-	static std::optional<Game> load_config(const std::string& path);
+	static std::optional<Game> load_config(const std::string&, const std::string&);
 
 	/// @brief Start game
 	void run();
 
 protected:
-	int player_count;
+    Game(Map&& world_map, PlayerManager&& player_manager, Logger&& logger, Observer&& observer) : world_map(std::move(world_map)), player_manager(std::move(player_manager)), logger(std::move(logger)), observer(std::move(observer)) {};
 	int current_turn = 0;
 	AntMap alive_ants;
 	PlayerMap alive_players;
 	std::set<Hill, HillComparator> alive_hills;
 	std::set<Food, FoodComparator> alive_food;
 	std::map<PlayerID, std::set<HillID>> player_hills;
-	Map world_map;
 
+	Map world_map;
 	PlayerManager player_manager;
 	Logger logger;
 	Observer observer;

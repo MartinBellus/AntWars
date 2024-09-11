@@ -17,6 +17,7 @@ void set_limits(Limits limits) {
     }
 }
 
+// TODO add better isolation
 void Process::run(const string& log_path) {
     if(running) {
         return;

@@ -5,27 +5,29 @@
 
 using namespace std;
 
-PlayerManager::PlayerManager(string home_dir, vector<PlayerConfig>& player_configs) {
-	for(PlayerConfig config : player_configs) {
-		// Create new player
-		string command = config.dir_path + "/player";
-		ProbojPlayer player = ProbojPlayer(config, command);
-		if(player_map.find(config.id) != player_map.end()) {
-			cerr << "Player with id " << int(config.id) << " already exists!" << endl;
-			continue;
-		}
+// TODO add signal handlers to cleanup processes on exit
+PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerConfig>& player_configs) {
+    for(ProbojPlayerConfig proboj_config : player_configs) {
+        const PlayerConfig& config = proboj_config.config;
+        // Create new player
+        if(player_map.find(config.id) != player_map.end()) {
+            cerr << "Player with id " << int(config.id) << " already exists!" << endl;
+            continue;
+        }
+        string command = config.dir_path + "/player";
+        ProbojPlayer player = ProbojPlayer(proboj_config, command);
 
-		// Create players log file
-		string log_file_path = "";
-		if(config.use_logs) {
+        // Create players log file
+        string log_file_path = "";
+        if(proboj_config.use_logs) {
             log_file_path = home_dir + "/logs/" + config.name + ".log";
         }
 
-		// Start player process
-		player.process.run(log_file_path);
-		player.process.send_signal(SIGSTOP);
-		player_map[config.id] = std::move(player);
-	}
+        // Start player process
+        player.process.run(log_file_path);
+        player.process.send_signal(SIGSTOP);
+        player_map[config.id] = std::move(player);
+    }
 }
 
 stringstream PlayerManager::read_player(PlayerID id, Status& status) {
@@ -67,7 +69,7 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
     }
     kill_player(id);
 
-	return stringstream();
+    return stringstream();
 }
 
 void PlayerManager::send_player(PlayerID id, const string& data) {
