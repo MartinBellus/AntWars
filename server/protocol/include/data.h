@@ -18,6 +18,7 @@ struct ObserverTurn {
     const AntMap& alive_ants;
     const std::set<Hill, HillComparator>& alive_hills;
     const std::set<Food, FoodComparator>& alive_food;
+    const PlayerMap& alive_players;
     int turn_num;
 };
 

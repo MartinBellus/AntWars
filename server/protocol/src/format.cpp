@@ -33,6 +33,15 @@ namespace observer {
         }
         return ret.str();
     }
+    string format_player_score(const PlayerMap& players) {
+        stringstream ret;
+        ret << "PLAYER_SCORES " << players.size() << "\n";
+        for(const auto &[id, player]: players) {
+            ret << str(player.get_id()) << " "
+            << player.get_score() << "\n";
+        }
+        return ret.str();
+    }
 }
 
 string format_alive_ants(const AntMap& alive_ants) {
@@ -101,6 +110,7 @@ namespace format {
         << format_alive_ants(turn.alive_ants)
         << format_alive_hills(turn.alive_hills)
         << format_alive_food(turn.alive_food)
+        << observer::format_player_score(turn.alive_players)
         << DOT << "\n";
         return ret.str();
     }
@@ -136,4 +146,11 @@ namespace format {
         return ret.str();
     }
 
+    string final_score(const map<string, int>& name_to_score) {
+        stringstream ret;
+        for(const auto &[name, score] : name_to_score) {
+            ret << name << " " << score << "\n";
+        }
+        return ret.str();
+    }
 }

@@ -2,6 +2,7 @@
 #include "ant_spawn_phase.h"
 #include "attack_phase.h"
 #include "check_collisions.h"
+#include "food_spawn_phase.h"
 #include "format.h"
 #include "gather_phase.h"
 #include "razing_phase.h"
@@ -99,10 +100,12 @@ void Game::game_loop() {
     }
     // spawn food
     //
-    // TODO
+    for(Point p : get_new_food_locations((constants::MAX_FOOD_COUNT - alive_food.size())/2, world_map)) {
+        alive_food.insert(Food(p));
+    }
     // send data to observer
     //
-    ObserverTurn observer_turn{alive_ants, alive_hills, alive_food, current_turn};
+    ObserverTurn observer_turn{alive_ants, alive_hills, alive_food, alive_players, current_turn};
     observer.send(format::to_observer(observer_turn));
 
     current_turn++;
@@ -118,6 +121,11 @@ void Game::cleanup() {
 bool Game::check_end() {
     // TODO: add more end conditions
     if(alive_players.size() == 1) {
+        logger.log("Game end: Last player alive");
+        return true;
+    }
+    if(current_turn >= constants::MAX_TURN_COUNT) {
+        logger.log("Game end: Max turn count reached");
         return true;
     }
     return false;

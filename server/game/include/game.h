@@ -16,6 +16,11 @@
 #include "observer.h"
 #include "map.h"
 
+namespace constants {
+    static int MAX_FOOD_COUNT = 50;
+    static int MAX_TURN_COUNT = 300;
+}
+
 class Game {
 public:
 	/// @brief Create game from configuration file
