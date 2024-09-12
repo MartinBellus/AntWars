@@ -8,7 +8,7 @@ optional<tuple<PpmHeader, vector<PpmPixel>>> parse_ppm(const std::string &image_
     ifstream file(image_path);
 
     if (!file.is_open()) {
-        cerr << "Failed to open file" << endl;
+        cerr << "Failed to open file: " << image_path << endl;
         return nullopt;
     }
 

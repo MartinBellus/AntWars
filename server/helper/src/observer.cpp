@@ -14,5 +14,5 @@ Observer::Observer(const string& observation_file_path, bool no_observer) : no_o
 void Observer::send(const string& data) {
     if(no_observer)
         return;
-    observation_file << data << endl;
+    observation_file << data;
 }

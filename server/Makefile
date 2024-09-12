@@ -7,6 +7,7 @@ OBJDIR = build
 CC = g++
 
 CFLAGS = -std=c++23 -O3 -g3 -Wall -c -Wno-reorder
+#CFLAGS = -std=c++23 -g3 -Wall -c -Wno-reorder
 CSOURCES := $(wildcard **/src/*.cpp) $(wildcard *.cpp)
 COBJECTS := $(patsubst %.cpp,$(OBJDIR)/%.o,$(subst /src/,/,$(CSOURCES)))
 reverse =  $(subst /,/src/,$(patsubst $(OBJDIR)/%.o,%.cpp,$1))

@@ -44,7 +44,6 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
     auto response_status = response.wait_for(chrono::milliseconds(player.process.limits.time));
     if (response_status == future_status::timeout) {
         status = Status::TLE;
-        kill_player(id);
         cerr << "Player " << player.name << " exceeded time limit" << endl;
         return stringstream();
     }
@@ -67,7 +66,6 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
             cerr << "Player " << player.name << " terminated too soon" << endl;
             break;
     }
-    kill_player(id);
 
     return stringstream();
 }

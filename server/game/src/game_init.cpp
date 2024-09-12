@@ -35,6 +35,11 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
     }
     vector<PlayerConfig> player_configs = std::move(player_config_result.value());
 
+    if(game_config.max_player_count < player_configs.size()) {
+        cerr << "Too many players in player_config, max: " << game_config.max_player_count << endl;
+        return nullopt;
+    }
+
     // set constants
     if(game_config.max_food_count != -1) {
         constants::MAX_FOOD_COUNT = game_config.max_food_count;
@@ -49,7 +54,7 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
     }
 
     // setup observer
-    Observer observer(game_config.home_dir + "/observation.txt", game_config.use_observer);
+    Observer observer(game_config.home_dir + "/observation.txt", game_config.no_observer);
 
     // setup logger
     Logger logger(game_config.home_dir + "/logs/__server.txt");

@@ -13,7 +13,7 @@ struct GameConfig {
     int max_food_count; // optional
     int max_player_count;
     int hills_per_player; // optional
-    bool use_observer = true;
+    bool no_observer = false;
     static std::optional<GameConfig> parse(const std::string&);
 };
 

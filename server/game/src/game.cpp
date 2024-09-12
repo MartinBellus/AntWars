@@ -31,6 +31,19 @@ void Game::init() {
         player_init.my_id = id;
         player_manager.send_player(id, format::init_player(player_init));
     }
+    // check if all players are ready
+    vector<PlayerID> not_responding;
+    for(const auto& [id, player] : alive_players) {
+        Status status;
+        stringstream ss = player_manager.read_player(id, status);
+        if(status != Status::OK) {
+            logger.log("Player " + player.get_name() + " failed to initialize");
+            not_responding.push_back(id);
+        }
+    }
+    for(PlayerID id : not_responding) {
+        kill_player(id);
+    }
 }
 
 void Game::game_loop() {
@@ -44,6 +57,7 @@ void Game::game_loop() {
        this_turn.food_count = player.get_food_count();
        player_manager.send_player(player_id, format::to_player(this_turn));
     }
+    vector<PlayerID> not_responding;
     for(auto &[_, player] : alive_players) {
         PlayerID player_id = player.get_id();
         Status status;
@@ -51,13 +65,16 @@ void Game::game_loop() {
 
         if(status == Status::TLE) {
             logger.log("Killing player " + player.get_name() + ": Time limit exceeded");
-            kill_player(player_id);
+            not_responding.push_back(player_id);
+            continue;
         }else if(status == Status::ERR) {
             logger.log("Killing player " + player.get_name() + ": Player has crashed");
-            kill_player(player_id);
+            not_responding.push_back(player_id);
+            continue;
         }else if(status == Status::END) {
             logger.log("Killing player " + player.get_name() + ": Player terminated too soon");
-            kill_player(player_id);
+            not_responding.push_back(player_id);
+            continue;
         }
 
         auto player_moves = Moves::from_sstream(ss);
@@ -67,6 +84,11 @@ void Game::game_loop() {
         }
         handle_player_moves(player, player_moves.value());
     }
+
+    for(PlayerID id : not_responding) {
+        kill_player(id);
+    }
+
     //  check for collisions
     //
     for(AntID ant_id : get_colliding_ants(alive_ants)) {
@@ -120,6 +142,10 @@ void Game::cleanup() {
 
 bool Game::check_end() {
     // TODO: add more end conditions
+    if(alive_players.size() == 0) {
+        logger.log("Game end: No players left");
+        return true;
+    }
     if(alive_players.size() == 1) {
         logger.log("Game end: Last player alive");
         return true;
@@ -144,8 +170,12 @@ void Game::kill_ant(AntID ant_id) {
 
 void Game::kill_hill(HillID hill_id) {
     Hill hill = *alive_hills.find(hill_id);
-    player_hills[hill.get_owner()].erase(hill_id);
+    PlayerID owner = hill.get_owner();
+    player_hills[owner].erase(hill_id);
     alive_hills.erase(hill);
+    if(player_hills[owner].size() == 0) {
+        kill_player(owner);
+    }
 }
 
 void Game::harvest_food(FoodID food_id, PlayerID player_id) {

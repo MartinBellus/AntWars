@@ -32,7 +32,7 @@ optional<GameConfig> GameConfig::parse(const std::string &path) {
     map<string, string> content;
     string line;
     while(getline(file, line)) {
-        if(line[0] == '#') {
+        if(line.size() == 0 || line[0] == '#') {
             continue;
         }
         stringstream ss(line);
@@ -56,7 +56,25 @@ optional<GameConfig> GameConfig::parse(const std::string &path) {
 }
 
 optional<vector<PlayerConfig>> parse_players(const std::string& path){
-    // TODO
-    cerr << "Could not parse player config" << endl;
-    return nullopt;
+    ifstream file(path);
+    if(!file.is_open()) {
+        cerr << "Could not open file: " << path << endl;
+        return nullopt;
+    }
+    vector<PlayerConfig> players;
+    string line;
+    while(getline(file,line)){
+        if(line.size() == 0 || line[0] == '#') {
+            continue;
+        }
+        stringstream ss(line);
+        string name, path;
+        if(!(ss >> name >> path)) {
+            cerr << "Could not parse line: " << line << endl;
+            continue;
+        }
+        players.push_back(PlayerConfig(std::move(name), std::move(path)));
+    }
+
+    return optional(players);
 }
