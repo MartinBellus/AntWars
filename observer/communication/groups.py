@@ -45,6 +45,7 @@ class Turn:
         self.alive_ants : AliveAntsBlock = AliveAntsBlock()
         self.food : FoodBlock = FoodBlock()
         self.alive_hills : AliveHillsBlock = AliveHillsBlock()
+        self.player_scores : PlayerScoresBlock = PlayerScoresBlock()
         self.num = Turn.num
         Turn.num += 1
 
@@ -59,6 +60,8 @@ class Turn:
                     this.food = block
                 case AliveHillsBlock():
                     this.alive_hills = block
+                case PlayerScoresBlock():
+                    this.player_scores = block
                 case _:
                     print(f"Unexpected block {block.__class__.__name__}", file=sys.stderr)
 

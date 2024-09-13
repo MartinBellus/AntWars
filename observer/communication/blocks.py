@@ -132,3 +132,23 @@ class AliveHillsBlock(Block):
 
     def __iter__(self):
         return iter(self.data)
+@parser.register("PLAYER_SCORES")
+class PlayerScoresBlock(Block):
+    """ Dict of player scores
+
+    Data contains dict of player IDs to scores
+    """
+    def __init__(self):
+        super().__init__()
+        self.data: Dict[int, int] = dict()
+
+    @classmethod
+    def parse(cls, lines : int, stream : TextIO):
+        this = super().parse(lines, stream)
+        for line in this._data:
+            id, score = line.split()
+            this.data[id] = score
+        return this
+
+    def __iter__(self):
+        return iter(self.data.items())
