@@ -69,7 +69,7 @@ map<AntID, Ant> parse_alive_ants(stringstream& ss) {
     while(getline(ss, line)) {
         Ant ant;
         stringstream _line(line);
-        if(!(_line >> ant.id >> ant.owner >> ant.pos.x >> ant.pos.y)) {
+        if(!(_line >> ant.owner >> ant.id >> ant.pos.x >> ant.pos.y)) {
             cerr << "Error when parsing alive ants" << endl;
             exit(1);
         }

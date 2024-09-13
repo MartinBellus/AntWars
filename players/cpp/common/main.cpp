@@ -12,10 +12,12 @@ int main() {
     cout << '.' << endl;
     while(1) {
         update_world(world);
+        cerr << "STARTING TURN: " << world.turn << "\n";
         vector<Move> moves = player_bot.get_turn(world);
         for(Move move : moves) {
             cout << move.ant << " " << move.to.x << " " << move.to.y << "\n";
         }
         cout << '.' << endl;
+        cerr << "\n";
     }
 }
