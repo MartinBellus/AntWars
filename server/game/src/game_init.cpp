@@ -109,7 +109,8 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
             player.inc_ants();
             player.update_score(score::POINTS_PER_HILL);
         }
-        insert(game.alive_players, std::move(player));
+        game.alive_players.insert(player.get_id());
+        insert(game.all_players, std::move(player));
     }
 
     return game;

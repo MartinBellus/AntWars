@@ -36,7 +36,8 @@ protected:
     Game(Map&& world_map, PlayerManager&& player_manager, Logger&& logger, Observer&& observer) : world_map(std::move(world_map)), player_manager(std::move(player_manager)), logger(std::move(logger)), observer(std::move(observer)) {};
 	int current_turn = 0;
 	AntMap alive_ants;
-	PlayerMap alive_players;
+	std::set<PlayerID> alive_players;
+	PlayerMap all_players;
 	std::set<Hill, HillComparator> alive_hills;
 	std::set<Food, FoodComparator> alive_food;
 	std::map<PlayerID, std::set<HillID>> player_hills;
