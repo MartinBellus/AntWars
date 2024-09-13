@@ -2,6 +2,7 @@
 #include "config.h"
 #include "player_manager.h"
 #include "rng.h"
+#include "score.h"
 
 #include <algorithm>
 #include <sys/stat.h>
@@ -54,7 +55,7 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
     }
 
     // setup observer
-    Observer observer(game_config.home_dir + "/observation.txt", game_config.no_observer);
+    Observer observer(game_config.home_dir, game_config.no_observer);
 
     // setup logger
     Logger logger(game_config.home_dir + "/logs/__server.txt");
@@ -105,7 +106,8 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
             game.player_hills[conf.id].insert(hill.get_id());
             game.alive_hills.insert(std::move(hill));
             insert(game.alive_ants, Ant(pos, conf.id));
-            // TODO maybe incremet points
+            player.inc_ants();
+            player.update_score(score::POINTS_PER_HILL);
         }
         insert(game.alive_players, std::move(player));
     }

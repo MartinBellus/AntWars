@@ -6,6 +6,7 @@
 #include "format.h"
 #include "gather_phase.h"
 #include "razing_phase.h"
+#include "score.h"
 
 using namespace std;
 
@@ -23,8 +24,6 @@ void Game::init() {
     ObserverInit observer_init{alive_players, world_map, alive_hills};
     observer.send(format::init_observer(observer_init));
 
-    // run player processes
-    //
     // send data to players
     PlayerInit player_init{world_map, alive_hills, PlayerID::NONE};
     for(const auto& [id, player] : alive_players) {
@@ -102,8 +101,8 @@ void Game::game_loop() {
 
     // razing phase
     //
-    for(HillID razed_hill : mark_razed_hills(alive_ants, alive_hills)){
-        kill_hill(razed_hill);
+    for(auto [razed_hill, by] : mark_razed_hills(alive_ants, alive_hills)){
+        kill_hill(razed_hill, by);
     }
     // spawn ants
     //
@@ -112,6 +111,7 @@ void Game::game_loop() {
             if(player.get_food_count()) {
                 insert(alive_ants, Ant(p, player_id));
                 player.dec_food_count();
+                player.inc_ants();
             }
         }
     }
@@ -140,8 +140,20 @@ void Game::cleanup() {
     //
 }
 
+vector<PlayerID> check_dead_players(const PlayerMap& players, const map<PlayerID, set<HillID>>& player_hills) {
+    vector<PlayerID> dead_players;
+    for(auto &[id, player] : players) {
+        if((player.get_alive_ants() == 0 && (player.get_food_count() == 0 || player_hills.at(id).size() == 0))) {
+            dead_players.push_back(id);
+        }
+    }
+    return dead_players;
+}
+
 bool Game::check_end() {
-    // TODO: add more end conditions
+    for(PlayerID player : check_dead_players(alive_players, player_hills)) {
+        kill_player(player);
+    }
     if(alive_players.size() == 0) {
         logger.log("Game end: No players left");
         return true;
@@ -162,20 +174,24 @@ void Game::kill_player(PlayerID player_id) {
     player_manager.kill_player(player_id);
     logger.log("Player " + player.get_name() + " has been killed");
     alive_players.erase(player_id);
+    for(auto &[id, player] : alive_players) {
+        player.update_score(score::ALIVE_POINTS);
+    }
 }
 
 void Game::kill_ant(AntID ant_id) {
+    PlayerID owner = alive_ants[ant_id].get_owner();
+    alive_players[owner].dec_ants();
     alive_ants.erase(ant_id);
 }
 
-void Game::kill_hill(HillID hill_id) {
+void Game::kill_hill(HillID hill_id, PlayerID by) {
     Hill hill = *alive_hills.find(hill_id);
     PlayerID owner = hill.get_owner();
     player_hills[owner].erase(hill_id);
     alive_hills.erase(hill);
-    if(player_hills[owner].size() == 0) {
-        kill_player(owner);
-    }
+    alive_players[owner].update_score(-score::POINTS_PER_HILL);
+    alive_players[by].update_score(score::RAZING_POINTS);
 }
 
 void Game::harvest_food(FoodID food_id, PlayerID player_id) {

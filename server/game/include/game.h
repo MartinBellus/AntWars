@@ -17,7 +17,7 @@
 #include "map.h"
 
 namespace constants {
-    static int MAX_FOOD_COUNT = 50;
+    static int MAX_FOOD_COUNT = 20;
     static int MAX_TURN_COUNT = 300;
 }
 
@@ -52,7 +52,7 @@ protected:
 	void cleanup();
 
 	void kill_ant(AntID);
-	void kill_hill(HillID);
+	void kill_hill(HillID, PlayerID);
 	void kill_player(PlayerID);
 	void harvest_food(FoodID, PlayerID);
 	void move_ant(AntID, Point);

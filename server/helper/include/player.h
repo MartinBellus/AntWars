@@ -16,11 +16,15 @@ public:
 	int get_food_count() const { return food_count; }
 	void inc_food_count() { food_count++; }
 	void dec_food_count() { food_count--; }
+	void inc_ants() { alive_ants++; }
+	void dec_ants() { alive_ants--; }
+	int get_alive_ants() const { return alive_ants; }
 	auto operator <=> (const Player& other) const {return id <=> other.id;}
 private:
 	std::string name;
 	int score = 0;
 	int food_count = 0;
+	int alive_ants = 0;
 	PlayerID id;
 };
 

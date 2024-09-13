@@ -104,7 +104,11 @@ ProcessState check_process(pid_t pid) {
     }
     if(WIFEXITED(status)) {
         // process ended normally, but too soon
-        return ProcessState::END;
+        int exit_status = WEXITSTATUS(status);
+        if(exit_status == 0)
+            return ProcessState::END;
+        else
+            return ProcessState::EXC;
     }else {
         // process ended abnormally
         return ProcessState::EXC;

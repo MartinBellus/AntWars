@@ -8,7 +8,7 @@ optional<Moves> Moves::from_sstream(stringstream &in) {
 	while(getline(in, line)) {
 		stringstream line_stream(line);
 		int id, x, y;
-		if(cin >> id >> x >> y) {
+		if(line_stream >> id >> x >> y) {
 			moves.data.push_back({AntID(id), Point(x, y)});
 		}else {
 			// Return None value
