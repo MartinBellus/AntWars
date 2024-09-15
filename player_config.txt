@@ -1,4 +1,6 @@
-# bot_name path_to_home_dir
+# <bot_name> <path_to_home_dir> <optional_args>
+# Optional args:
+#   NO_SANDBOX - do not place bot inside a sandbox (currently needed for python bots)
 cpp1 ./players/cpp
 
 cpp2 ./players/cpp

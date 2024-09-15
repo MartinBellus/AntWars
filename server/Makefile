@@ -14,7 +14,7 @@ reverse =  $(subst /,/src/,$(patsubst $(OBJDIR)/%.o,%.cpp,$1))
 
 #linker
 LINKER = g++
-LFLAGS =
+LFLAGS = -lcap
 INCLUDE = $(addprefix -I, $(wildcard **/include))
 
 

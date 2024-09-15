@@ -29,14 +29,15 @@ public:
 	void send_player(PlayerID,const std::string&);
 	std::stringstream send_and_read_player(PlayerID, const std::string&, Status&);
 	void kill_player(PlayerID);
+	void cleanup();
 private:
 	struct ProbojPlayer {
 		ProbojPlayer() {}
-		ProbojPlayer(const ProbojPlayerConfig& conf, const std::string& command) : id(conf.config.id), name(conf.config.name), dir_path(conf.config.dir_path), process(command, conf.limits) {}
+		ProbojPlayer(const ProbojPlayerConfig& conf, std::string sandbox_path, const std::string& command) : id(conf.config.id), name(conf.config.name), process({command, conf.config.name}, sandbox_path, conf.limits) {}
 		PlayerID id;
 		std::string name;
-		std::string dir_path;
 		Process process;
 	};
 	std::map<PlayerID, ProbojPlayer> player_map;
+	std::string sandbox_root;
 };

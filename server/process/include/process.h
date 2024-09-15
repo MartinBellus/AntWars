@@ -1,17 +1,14 @@
 #pragma once
 
+#include "isolate.h"
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string>
-
-struct Limits {
-	int time = 1000;
-	int memory = 256*1024*1024;
-};
+#include <atomic>
 
 enum class ProcessState {
-    OK,
+    RUN,
     EXC,
     END,
     ERR
@@ -20,16 +17,17 @@ enum class ProcessState {
 struct Process {
 	pid_t pid;
 	FILE* child_stdin, *child_stdout;
-	std::string command;
+	int status_pipe;
+	std::vector<std::string> command;
+	std::string sandbox_path;
 	bool running = false;
 	Limits limits;
-	Process(std::string command, Limits limit) : command(command), limits(limit) {};
+	Process(std::vector<std::string> command, std::string sandbox_path, Limits limit) : command(command), sandbox_path(sandbox_path), limits(limit) {};
 	Process() {};
 
-	void run(const std::string& = "");
+	int run(const std::string& = "");
 	void send(const std::string&);
-	std::string read_stdin();
+	std::string read_stdin(std::atomic<bool>&);
 	void send_signal(int);
+	ProcessState check_status();
 };
-
-ProcessState check_process(pid_t);

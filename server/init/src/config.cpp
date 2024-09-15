@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 #include <sstream>
 
 using namespace std;
@@ -21,6 +22,10 @@ string at_or(const map<string, string>& dict, const string& key, const string& d
         return dict.at(key);
     }
     return def;
+}
+
+bool contains(const set<string>& st, const string& key) {
+    return st.find(key) != st.end();
 }
 
 optional<GameConfig> GameConfig::parse(const std::string &path) {
@@ -73,7 +78,14 @@ optional<vector<PlayerConfig>> parse_players(const std::string& path){
             cerr << "Could not parse line: " << line << endl;
             continue;
         }
-        players.push_back(PlayerConfig(std::move(name), std::move(path)));
+        set<string> args;
+        string arg;
+        while(ss >> arg) {
+            args.insert(arg);
+        }
+        PlayerConfig config(name, path);
+        config.use_sandbox = !contains(args, "NO_SANDBOX");
+        players.push_back(config);
     }
 
     return optional(players);
