@@ -1,14 +1,39 @@
 #include "player_manager.h"
 #include "util.h"
+#include <csignal>
 #include <future>
 #include <iostream>
 #include <sys/wait.h>
 
 using namespace std;
 
-// TODO add signal handlers to cleanup processes on exit
+
+static const char* _sandbox_root = nullptr;
+
+void signal_handler(int signum) {
+    if(signum == SIGCHLD) {
+        waitpid(-1, NULL, WNOHANG);
+    }
+    if(signum == SIGTERM || signum == SIGINT) {
+        if(_sandbox_root != nullptr)
+            rm_rf(_sandbox_root);
+        exit(1);
+    }
+}
+
+void setup_signals() {
+    // Reap terminating child processes
+    signal(SIGCHLD, signal_handler);
+    // Ignore SIGPIPE
+    signal(SIGPIPE, signal_handler);
+    // Cleanup after SIGTERM or SIGINT
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
+}
+
 PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerConfig>& player_configs) {
     sandbox_root = temp_dir("/tmp");
+    _sandbox_root = sandbox_root.c_str();
     for(ProbojPlayerConfig proboj_config : player_configs) {
         const PlayerConfig& config = proboj_config.config;
         // Create new player
@@ -41,6 +66,9 @@ PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerCon
         player.process.send_signal(SIGSTOP);
         player_map[config.id] = std::move(player);
     }
+
+    // Register signal handlers
+    setup_signals();
 }
 
 stringstream PlayerManager::read_player(PlayerID id, Status& status) {
