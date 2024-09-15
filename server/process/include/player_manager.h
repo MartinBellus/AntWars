@@ -20,7 +20,6 @@ struct ProbojPlayerConfig {
     const PlayerConfig& config;
 	Limits limits;
 	bool use_logs = true;
-	bool use_sandbox = true;
 };
 
 class PlayerManager {

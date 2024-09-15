@@ -18,7 +18,7 @@ PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerCon
         }
         string command = config.dir_path + "/player";
         string sandbox_dir = "";
-        if(proboj_config.use_sandbox) {
+        if(config.use_sandbox) {
             sandbox_dir = temp_dir(sandbox_root.c_str());
             string destination = sandbox_dir + "/player";
             if(file_copy(command.c_str(), destination.c_str()) != 0) {

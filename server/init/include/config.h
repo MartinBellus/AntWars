@@ -18,9 +18,10 @@ struct GameConfig {
 };
 
 struct PlayerConfig {
-    PlayerConfig(std::string&& name, std::string&& dir_path) : name(std::move(name)), dir_path(std::move(dir_path)), id(++id_counter) {}
+    PlayerConfig(std::string name, std::string dir_path) : name(name), dir_path(dir_path), id(++id_counter) {}
     std::string name;
     std::string dir_path;
+    bool use_sandbox = true;
     PlayerID id;
     static inline PlayerID id_counter = PlayerID(0);
 };
