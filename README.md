@@ -53,7 +53,8 @@ replay the game in the observer, `scores.txt` with end game scores, and the
 `logs` directory. This directory contains logs of all players and the server.
 Everything that your bot prints to `stderr` will be saved here.
 
-> [!IMPORTANT] Do not write anything to `stdout`, as it is used by the server
+> [!IMPORTANT]
+> Do not write anything to `stdout`, as it is used by the server
 > to communicate with your bot. Doing so will interfere with communication and
 > cause undefined behavior for your bot.
 
