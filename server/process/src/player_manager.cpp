@@ -62,7 +62,10 @@ PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerCon
         }
 
         // Start player process
-        player.process.run(log_file_path);
+        if(player.process.run(log_file_path) < 0) {
+            cerr << "Error starting player: " << config.name << endl;
+            continue;
+        }
         player.process.send_signal(SIGSTOP);
         player_map[config.id] = std::move(player);
     }
@@ -77,8 +80,9 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
         return stringstream();
     }
     ProbojPlayer& player = player_map[id];
-    future<string> response = async(launch::async, [&player] {
-        return player.process.read_stdin();
+    atomic<bool> stop_flag(false);
+    future<string> response = async(launch::async, [&player, &stop_flag] {
+        return player.process.read_stdin(stop_flag);
     });
 
     player.process.send_signal(SIGCONT);
@@ -86,6 +90,8 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
     if (response_status == future_status::timeout) {
         status = Status::TLE;
         cerr << "Player " << player.name << " exceeded time limit" << endl;
+        stop_flag = true;
+        player.process.send_signal(SIGTERM);
         return stringstream();
     }
     ProcessState state = player.process.check_status();

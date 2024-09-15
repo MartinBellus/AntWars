@@ -3,9 +3,11 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
+#include <poll.h>
 
 using namespace std;
 
@@ -57,7 +59,7 @@ void Process::send(const string& data) {
     fflush(child_stdin);
 }
 
-string Process::read_stdin() {
+string Process::read_stdin(atomic<bool>& stop) {
     if(!running) {
         return "";
     }
@@ -65,12 +67,28 @@ string Process::read_stdin() {
     size_t len = 0;
     ssize_t read;
     string result;
-    while((read = getline(&line, &len, child_stdout)) != -1) {
-        if(line[read - 1] == '\n' && line[0] == '.') {
-            break;
+    struct pollfd poll_fd;
+    poll_fd.fd = fileno(child_stdout);
+    poll_fd.events = POLLIN;
+
+    while(!stop) {
+        int status = poll(&poll_fd, 1, limits.time_limit/3);
+        if(status == -1) {
+            return "";
+        } else if(status == 0) {
+            continue;
         }
-        result += string(line, line + read);
+        while((read = getline(&line, &len, child_stdout) > 0)) {
+            read = strlen(line);
+            if(line[read - 1] == '\n' && line[0] == '.') {
+                stop = true;
+                break;
+            }
+            result += string(line, line + read);
+        }
     }
+    if(line != NULL)
+        free(line);
     return result;
 }
 

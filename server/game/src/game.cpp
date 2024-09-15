@@ -156,6 +156,7 @@ vector<PlayerID> check_dead_players(const set<PlayerID>& alive_players, const Pl
 
 bool Game::check_end() {
     for(PlayerID player : check_dead_players(alive_players, all_players, player_hills)) {
+        logger.log("Player " + all_players[player].get_name() + " has not enough resources to continue playing");
         kill_player(player);
     }
     if(alive_players.size() == 0) {

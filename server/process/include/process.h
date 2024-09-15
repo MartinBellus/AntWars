@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string>
+#include <atomic>
 
 enum class ProcessState {
     RUN,
@@ -26,7 +27,7 @@ struct Process {
 
 	int run(const std::string& = "");
 	void send(const std::string&);
-	std::string read_stdin();
+	std::string read_stdin(std::atomic<bool>&);
 	void send_signal(int);
 	ProcessState check_status();
 };
