@@ -70,7 +70,7 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
     // setup player manager
     vector<ProbojPlayerConfig> proboj_configs;
     for(const PlayerConfig& conf : player_configs) {
-        proboj_configs.push_back(ProbojPlayerConfig{conf, Limits{}}); // TODO default limits for now
+        proboj_configs.push_back(ProbojPlayerConfig{conf, Limits{}});
     }
     PlayerManager player_manager(game_config.home_dir, proboj_configs);
 
