@@ -5,5 +5,7 @@
 # MAX_FOOD_COUNT, default 20
 # MAX_PLAYER_COUNT
 # HILLS_PER_PLAYER, default 1
+# NO_OBSERVER, set to non-zero to disable observer
+# NO_LOGGER, set to non-zero to disable logger
 
 MAX_PLAYER_COUNT 4

@@ -17,8 +17,9 @@ Observer::Observer(const string& home_dir, bool no_observer) : no_observer(no_ob
 }
 
 void Observer::send(const string& data) {
-    if(no_observer)
+    if(no_observer) {
         return;
+    }
     observation_file << data;
 }
 

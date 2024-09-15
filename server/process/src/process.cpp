@@ -67,16 +67,24 @@ string Process::read_stdin(atomic<bool>& stop) {
     size_t len = 0;
     ssize_t read;
     string result;
-    struct pollfd poll_fd;
-    poll_fd.fd = fileno(child_stdout);
-    poll_fd.events = POLLIN;
+    struct pollfd input_poll_fd;
+    input_poll_fd.fd = fileno(child_stdout);
+    input_poll_fd.events = POLLIN;
+
+    struct pollfd status_poll_fd;
+    status_poll_fd.fd = status_pipe;
+    status_poll_fd.events = POLLIN;
 
     while(!stop) {
-        int status = poll(&poll_fd, 1, limits.time_limit/3);
+        int status = poll(&input_poll_fd, 1, limits.time_limit/3);
         if(status == -1) {
             return "";
         } else if(status == 0) {
             continue;
+        }
+        status = poll(&status_poll_fd, 1, 0);
+        if(status == -1 || status == 0) {
+            return "";
         }
         while((read = getline(&line, &len, child_stdout) > 0)) {
             read = strlen(line);

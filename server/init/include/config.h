@@ -14,6 +14,7 @@ struct GameConfig {
     int max_player_count;
     int hills_per_player; // optional
     bool no_observer = false;
+    bool no_logger = false;
     static std::optional<GameConfig> parse(const std::string&);
 };
 

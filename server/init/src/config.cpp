@@ -56,6 +56,8 @@ optional<GameConfig> GameConfig::parse(const std::string &path) {
     config.max_food_count = from_string(at_or(content, "MAX_FOOD_COUNT", "-1"));
     config.max_player_count = from_string(at_or(content, "MAX_PLAYER_COUNT", "0"));
     config.hills_per_player = from_string(at_or(content, "HILLS_PER_PLAYER", "1"));
+    config.no_logger = from_string(at_or(content, "NO_LOGGER", "0"));
+    config.no_observer = from_string(at_or(content, "NO_OBSERVER", "0"));
 
     return optional(config);
 }

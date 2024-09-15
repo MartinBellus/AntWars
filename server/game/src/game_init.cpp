@@ -58,7 +58,7 @@ optional<Game> Game::load_config(const std::string& game_config_path, const std:
     Observer observer(game_config.home_dir, game_config.no_observer);
 
     // setup logger
-    Logger logger(game_config.home_dir + "/logs/__server.txt");
+    Logger logger(game_config.home_dir + "/logs/__server.txt", game_config.no_logger);
 
     // setup map
     auto map_result = Map::from_ppm(game_config.map_path);
