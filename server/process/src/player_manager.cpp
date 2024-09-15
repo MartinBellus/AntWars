@@ -1,4 +1,5 @@
 #include "player_manager.h"
+#include "util.h"
 #include <future>
 #include <iostream>
 #include <sys/wait.h>
@@ -7,6 +8,7 @@ using namespace std;
 
 // TODO add signal handlers to cleanup processes on exit
 PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerConfig>& player_configs) {
+    sandbox_root = temp_dir("/tmp");
     for(ProbojPlayerConfig proboj_config : player_configs) {
         const PlayerConfig& config = proboj_config.config;
         // Create new player
@@ -15,7 +17,18 @@ PlayerManager::PlayerManager(const string& home_dir,const vector<ProbojPlayerCon
             continue;
         }
         string command = config.dir_path + "/player";
-        ProbojPlayer player = ProbojPlayer(proboj_config, command);
+        string sandbox_dir = "";
+        if(proboj_config.use_sandbox) {
+            sandbox_dir = temp_dir(sandbox_root.c_str());
+            string destination = sandbox_dir + "/player";
+            if(file_copy(command.c_str(), destination.c_str()) != 0) {
+                perror("file_copy");
+                cerr << "Error copying player to sandbox" << endl;
+                continue;
+            }
+            command = "./player";
+        }
+        ProbojPlayer player = ProbojPlayer(proboj_config, sandbox_dir, command);
 
         // Create players log file
         string log_file_path = "";
@@ -41,15 +54,15 @@ stringstream PlayerManager::read_player(PlayerID id, Status& status) {
     });
 
     player.process.send_signal(SIGCONT);
-    auto response_status = response.wait_for(chrono::milliseconds(player.process.limits.time));
+    auto response_status = response.wait_for(chrono::milliseconds(player.process.limits.time_limit));
     if (response_status == future_status::timeout) {
         status = Status::TLE;
         cerr << "Player " << player.name << " exceeded time limit" << endl;
         return stringstream();
     }
-    ProcessState state = check_process(player.process.pid);
+    ProcessState state = player.process.check_status();
     switch(state) {
-        case ProcessState::OK:
+        case ProcessState::RUN:
             player.process.send_signal(SIGSTOP);
             status = Status::OK;
             return stringstream(response.get());
@@ -76,8 +89,8 @@ void PlayerManager::send_player(PlayerID id, const string& data) {
         return;
     }
     ProbojPlayer& player = player_map[id];
-    ProcessState state = check_process(player.process.pid);
-    if(state == ProcessState::OK) {
+    ProcessState state = player.process.check_status();
+    if(state == ProcessState::RUN) {
         player.process.send(data);
     } else {
         cerr << "Player with id " << int(id) << " is not running!" << endl;
@@ -98,11 +111,22 @@ void PlayerManager::kill_player(PlayerID id) {
         return;
     }
     ProbojPlayer& player = player_map[id];
-    ProcessState state = check_process(player.process.pid);
-    if(state == ProcessState::OK) {
+    ProcessState state = player.process.check_status();
+    if(state == ProcessState::RUN) {
         player.process.send_signal(SIGTERM);
-        waitpid(player.process.pid, NULL, WNOHANG);
     }
     cerr << "Killing player " << player.name << endl;
     player_map.erase(id);
+}
+
+void PlayerManager::cleanup() {
+    // remove sandbox directory
+    if(rm_rf(sandbox_root.c_str()) != 0) {
+        cerr << "Could not remove directory: " << sandbox_root << endl;
+    }
+
+    // stop all processes
+    for(auto &[id, player] : player_map) {
+        player.process.send_signal(SIGKILL);
+    }
 }

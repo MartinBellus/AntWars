@@ -1,63 +1,52 @@
 #include "process.h"
+#include "isolate.h"
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 
 using namespace std;
 
-void set_limits(Limits limits) {
-    struct rlimit limit;
-    limit.rlim_cur = limits.memory;
-    limit.rlim_max = limits.memory;
-    if(setrlimit(RLIMIT_AS, &limit) != 0) {
-       perror("setrlimit");
-       exit(1);
-    }
-}
-
-// TODO add better isolation
-void Process::run(const string& log_path) {
+int Process::run(const string& log_path) {
     if(running) {
-        return;
+        return 1;
     }
     int pipes[2][2];
 
     pipe(pipes[0]);
     pipe(pipes[1]);
-
-    if((pid = fork()) > 0){
-
-        close(pipes[0][0]);
-        close(pipes[1][1]);
-
-        child_stdin = fdopen(pipes[0][1], "w");
-        child_stdout = fdopen(pipes[1][0], "r");
-    } else{
-        close(pipes[1][0]);
-        close(pipes[0][1]);
-
-
-        dup2(pipes[0][0], STDIN_FILENO);
-        dup2(pipes[1][1], STDOUT_FILENO);
-
-        if(log_path != "") {
-            int log_fd = open(log_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
-            dup2(log_fd, STDERR_FILENO);
-            close(log_fd);
-        }
-
-        close(pipes[0][0]);
-        close(pipes[1][1]);
-
-        set_limits(limits);
-        char* args[] = {(char*)command.c_str(), NULL};
-        execvp(command.c_str(), args);
-
-        exit(1);
+    int log_fd;
+    if(log_path != "") {
+        log_fd = open(log_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    } else {
+        log_fd = open("/dev/null", O_WRONLY);
     }
+
+    IsolateArgs args(
+        command,
+        sandbox_path,
+        limits
+    );
+
+    pid = run_isolated(args, pipes[0][0], pipes[1][1], log_fd, &status_pipe);
+
+    close(pipes[0][0]);
+    close(pipes[1][1]);
+    close(log_fd);
+
+    if(pid < 0) {
+        close(pipes[0][1]);
+        close(pipes[1][0]);
+        return -1;
+    }
+
+    child_stdin = fdopen(pipes[0][1], "w");
+    child_stdout = fdopen(pipes[1][0], "r");
+
     running = true;
+    return 0;
 }
 
 void Process::send(const string& data) {
@@ -92,25 +81,22 @@ void Process::send_signal(int signal) {
     kill(pid, signal);
 }
 
-ProcessState check_process(pid_t pid) {
-    int status;
-    pid_t ret_pid;
-    if((ret_pid = waitpid(pid, &status, WNOHANG)) == 0) {
-        // process is still running
-        return ProcessState::OK;
-    }else if(ret_pid == -1) {
-        // process does not exist
+ProcessState Process::check_status() {
+    if(!running) {
         return ProcessState::ERR;
     }
-    if(WIFEXITED(status)) {
-        // process ended normally, but too soon
-        int exit_status = WEXITSTATUS(status);
-        if(exit_status == 0)
-            return ProcessState::END;
-        else
-            return ProcessState::EXC;
-    }else {
-        // process ended abnormally
-        return ProcessState::EXC;
+    int status;
+    if(read(status_pipe, &status, sizeof(status)) < 0) {
+        if(errno == EAGAIN || errno == EWOULDBLOCK) {
+            return ProcessState::RUN;
+        }else {
+            return ProcessState::ERR;
+        }
     }
+    running = false;
+    if(WIFEXITED(status)) {
+        if(WEXITSTATUS(status) == 0)
+            return ProcessState::END;
+    }
+    return ProcessState::EXC;
 }

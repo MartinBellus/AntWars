@@ -5,7 +5,6 @@ OBJDIR = build
 
 #c++ compiler
 CC = g++
-
 CFLAGS = -std=c++23 -O3 -Wall -c -Wno-reorder
 CSOURCES := $(wildcard **/*.cpp) $(wildcard *.cpp)
 COBJECTS := $(patsubst %.cpp,$(OBJDIR)/%.o,$(subst /,/,$(CSOURCES)))
@@ -13,7 +12,7 @@ reverse =  $(subst /,/,$(patsubst $(OBJDIR)/%.o,%.cpp,$1))
 
 #linker
 LINKER = g++
-LFLAGS =
+LFLAGS = -static
 INCLUDE = -I.
 
 

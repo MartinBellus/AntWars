@@ -138,8 +138,9 @@ void Game::cleanup() {
     // save scores
     //
     observer.save_score(all_players);
-    // clean up all players
+    // clean up player manager
     //
+    player_manager.cleanup();
 }
 
 vector<PlayerID> check_dead_players(const set<PlayerID>& alive_players, const PlayerMap& all_players, const map<PlayerID, set<HillID>>& player_hills) {
