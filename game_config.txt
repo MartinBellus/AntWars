@@ -1,0 +1,9 @@
+# Options:
+# HOME_DIR, default game
+# MAP_PATH, default maps/default.ppm
+# MAX_TURN_COUNT, default 300
+# MAX_FOOD_COUNT, default 20
+# MAX_PLAYER_COUNT
+# HILLS_PER_PLAYER, default 1
+
+MAX_PLAYER_COUNT 4

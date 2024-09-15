@@ -1,0 +1,4 @@
+# bot_name path_to_home_dir
+cpp1 ./players/cpp
+
+cpp2 ./players/cpp
